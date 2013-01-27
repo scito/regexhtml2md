@@ -62,17 +62,16 @@
 <h3>HTML-Input</h3>\
 <div>\
 <textarea id="rhtml2md-input" autofocus rows="10" cols="60" wrap="off" style="' + areastyle + '" placeholder="Please enter your HTML text here.">\
-<p><strong>Im Gesundheitswesen gibt es viele Lobbygruppen – die Ärzteschaft, die Pharmaindustrie, die Apotheker, die Krankenkassen, … Ihre Interessen werden vertreten. Wer vertritt die Patienten und&nbsp;Bürger? Die Patienten selber? Lassen die Krankheiten das überhaupt zu?</strong></p>\n\
-<p><strong>Wie läuft die medizinische Forschung ab? Wer forscht? Was wird geforscht? Wer bezahlt die Forschung?</strong><!--break--></p>\n\
-<p>Er betrachtet das Gesundheitswesens und die Wissenschaft mit den Augen eines Patienten und Bürgers -- kurz <em>aus Patientensicht</em>.</p>\n\
-<p>Es sollen die Interessen von Bürgern und Patienten eingebracht und vertreten werden. Ja, Patienten und Bürgern. Denn jeder Patient ist auch ein Bürger und jeder Bürger wird früher oder später einmal zum Patienten. Und als Bürger zahlen wir alle die Rechnung.</p>\n\
-<p>Ich habe mich in den letzten zwei Jahren mit der medizinischen Forschung und der Gesundheitspolitik befasst. Dieses Wissen möchte ich weitergeben und auf wichtige Punkte aufmerksam machen. Einige Themen, finde ich, werden im deutschsprachigen Raum noch zu wenig wahrgenommen und diskutiert, so zum Beispiel die Thematik der Interessenkonflikte.</p>\n\
+<p><strong>Strong</strong></p>\n\
+<!--break-->\n\
+<p>Normal -- kurz <em>Em</em>.</p>\n\
+<p>Normal<br>Break Line</p>\n\
 <p><ul>\n\
 <li>Foo</li>\n\
 <li>Bar</li>\n\
 </ul>\n\
-<p><a href="http://patientensicht.ch">Patientensicht</a></p>\n\
-<p><a href="http://patientensicht.ch" title="Besuche mich">Patientensicht</a></p>\n\
+<p><a href="http://scito.ch">Scito</a></p>\n\
+<p><a href="http://scito.ch" title="Visit me">Scito</a></p>\
 </textarea>\
 <p>To convert, press <kbd>Ctrl</kbd> + <kbd>Enter</kbd> or click on the "Convert" button.\</p>\
 </div>\
@@ -93,6 +92,8 @@
         $("#rhtml2md-convert").click(function(event) {
             convert(event)
         });
+
+        $('#rhtml2md-input').select();
     });
 
     /**
