@@ -71,7 +71,7 @@
 <p><a href="http://patientensicht.ch">Patientensicht</a></p>\n\
 <p><a href="http://patientensicht.ch" title="Besuche mich">Patientensicht</a></p>\n\
 </textarea>\
-<p>Press <kbd>Ctrl</kbd> + <kbd>Enter</kbd> to convert.\</p>\
+<p>To convert, press <kbd>Ctrl</kbd> + <kbd>Enter</kbd> or click on the "Convert" button.\</p>\
 </div>\
 \
 <div style="text-align:center;"><button id="rhtml2md-convert" type="button" title="Starts the conversion" style="margin-top: 1em; margin-bottom: 1em; font-size: x-large;" class="no-print">Convert</button></div>\
@@ -114,7 +114,7 @@
             .replace(/<a href="([^"]+)" title="([^"]+)">([^<]+)<\/a>/igm, "[$3]($1 \"$2\")")
         ;
 
-        // Write result output
+        // Write conversion output
         $('#rhtml2md-output').html('\
 <h3>Markdown Extra Output</h3>\
 <textarea id="rhtml2md-output-md" rows="10" cols="60" wrap="off" style="' + areastyle + '"></textarea>\
@@ -122,6 +122,11 @@
 
         $('#rhtml2md-output-md').text(converted);
         $('#rhtml2md-output-md').select();
+
+        if (typeof Drupal != 'undefined') {
+            // Run attached behviors
+            Drupal.attachBehaviors($('#regexhtml2md').get());
+        }
 
         return false;
     }
