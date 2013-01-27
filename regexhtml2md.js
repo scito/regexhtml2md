@@ -1,38 +1,22 @@
 /*
- * p-value one sample simulator v1.
+ * Simple HTML to Markdown Extra converter with regex.
+ * Copy your HTML to the input area, press Ctrl+Enter, and copy your
+ * Markdown Extra from the output area.
  *
- * Copyright (C) 2013 ibex from Patientensicht.ch
+ * Copyright (C) 2013 Scito <http://scito.ch>
  *
- * Homepage: <http://patientensicht.ch/node/169>
  *
  * Changelog:
- * - 26.01.2013: Clean up by ibex
- * - 02.01.2013: Initial version by ibex
+ * - 27.01.2013: Initial version by scito
  *
  *
  * Dependencies:
- * - jStat <https://github.com/jstat/jstat>
  * - jQuery <http://jquery.com/>
- * - jQuery UI <http://jqueryui.com/>
  *
  *
  * HMTL code to run this script:
- * <div title="Sample code for p-value one sample simulator">
- *     <div id="p1s-simulation"></div>
- *
- *     < style>@import url("/misc/ui/jquery.ui.slider.css?mg24xt");</style>                                                                *
- *     <style>
- *            .tight-rows-min th, .tight-rows-min td {
- *             padding: 1px 1px;
- *     }
- *     </style>
- *
- *     <script src="/misc/ui/jquery.ui.widget.min.js?v=1.8.7"></script>
- *     <script src="/misc/ui/jquery.ui.mouse.min.js?v=1.8.7"></script>
- *     <script src="/misc/ui/jquery.ui.slider.min.js?v=1.8.7"></script>
- *     <script src="/sites/all/libraries/jstat/jstat.js?v=1"></script>
- *     <script src="/pathToScript/pval_1sample_simulator1.js?v=1.0"></script>
- * </div>
+ * <div id="regexhtml2md"></div>
+ * < script src="yourpath/regexhtml2md.js?v=1.0"></script>
  *
  *
  * This program is free software: you can redistribute it and/or modify
@@ -66,13 +50,15 @@
 
 (function ($) {
 
+    var areastyle = 'font-size: small; overflow: auto; font-family: monospace; width:100%; -webkit-box-sizing: border-box; -moz-box-sizing: border-box; box-sizing: border-box;';
+
     /** "Main function" */
     $(function() {
-            // Output simulation UI as HTML
-            $('#regexhtml2md').html('\
+        // Output simulation UI as HTML
+        $('#regexhtml2md').html('\
 <h3>HTML-Input</h3>\
 <div>\
-<textarea id="rhtml2md-input" rows="5" cols="60" wrap="off" class="overflow: auto; font-family: monospace;" placeholder="Please enter your HTML text here.">\
+<textarea id="rhtml2md-input" autofocus rows="10" cols="60" wrap="off" style="' + areastyle + '" placeholder="Please enter your HTML text here.">\
 <p><strong>Im Gesundheitswesen gibt es viele Lobbygruppen – die Ärzteschaft, die Pharmaindustrie, die Apotheker, die Krankenkassen, … Ihre Interessen werden vertreten. Wer vertritt die Patienten und&nbsp;Bürger? Die Patienten selber? Lassen die Krankheiten das überhaupt zu?</strong></p>\n\
 <p><strong>Wie läuft die medizinische Forschung ab? Wer forscht? Was wird geforscht? Wer bezahlt die Forschung?</strong><!--break--></p>\n\
 <p>Er betrachtet das Gesundheitswesens und die Wissenschaft mit den Augen eines Patienten und Bürgers -- kurz <em>aus Patientensicht</em>.</p>\n\
@@ -85,72 +71,59 @@
 <p><a href="http://patientensicht.ch">Patientensicht</a></p>\n\
 <p><a href="http://patientensicht.ch" title="Besuche mich">Patientensicht</a></p>\n\
 </textarea>\
+<p>Press <kbd>Ctrl</kbd> + <kbd>Enter</kbd> to convert.\</p>\
 </div>\
 \
-<div style="text-align:center;"><button id="rhtml2md-convert" type="button" autofocus title="Starts the conversion" style="margin-top: 1em; margin-bottom: 1em; font-size: x-large;" class="no-print">Convert</button></div>\
+<div style="text-align:center;"><button id="rhtml2md-convert" type="button" title="Starts the conversion" style="margin-top: 1em; margin-bottom: 1em; font-size: x-large;" class="no-print">Convert</button></div>\
 \
 <div id="rhtml2md-output"></div>\
             ');
 
-        // Additional CSS styling
-        //$('#p1s-summary tr th:nth-child(2), #p1s-summary tr td:nth-child(2)').css({'text-align': 'right'});
+        $('#rhtml2md-input').keydown(function (event) {
+            if (event.keyCode === 10 || event.keyCode == 13 && event.ctrlKey) {
+                // Ctrl-Enter pressed
+                convert(event);
+            }
+        });
 
         // Bind start button
         $("#rhtml2md-convert").click(function(event) {
-            event.preventDefault();
-            var input = $('#rhtml2md-input').val();
-            convert(input);
+            convert(event)
         });
     });
 
     /**
-     * Runs a simulation with a sample size n and runs runs and the probability p0 for 0.
+     * Converts basic HTML to Markdown Extra with regex.
      *
-     * @param n Sample size
-     * @param runs Number of runs
-     * @param p0 Actual probability for 0
+     * @param event JavaScript event
      *
-     * @return true
+     * @return false
      */
-    function convert(input) {
-//         """Converts HTML tags with MD."""
-//         text = re.compile(r'<p>').sub(r'', text)
-//         text = re.compile(r'</p>').sub(r'\n\n', text)
-//         text = re.compile(r'<br ?/?>').sub(r'  \n', text)
-//         text = re.compile(r'</?strong>').sub(r'**', text)
-//         text = re.compile(r'</?em>').sub(r'_', text)
-//         text = re.compile(r'</?ul>').sub(r'\n', text)
-//         text = re.compile(r'</li>').sub(r'', text)
-//         text = re.compile(r'<li>').sub(r'* ', text)
-//         text = re.compile(r'<h1>').sub(r'# ', text)
-//         text = re.compile(r'<h2>').sub(r'## ', text)
-//         text = re.compile(r'<h3>').sub(r'### ', text)
-//         text = re.compile(r'<h4>').sub(r'#### ', text)
-//         text = re.compile(r'<h5>').sub(r'##### ', text)
-//         text = re.compile(r'</h[12345]>').sub(r'', text)
-//         text = re.compile(r'<a href="([^"]+)">([^<]+)</a>').sub(r'[\2](\1)', text)
-//         text = re.compile(r'<a href="([^"]+)" title="([^"]+)">([^<]+)</a>').sub(r'[\3](\1 "\2")', text)
+    function convert(event) {
+        event.preventDefault();
+        var input = $('#rhtml2md-input').val();
 
         var converted = input.replace(/<p>/igm, "").replace(/<\/p>/igm, "\n")
-        .replace(/<br ?\/?>/igm, "  \n")
-        .replace(/<\/?strong>/igm, "**")
-        .replace(/<\/?em>/igm, "_")
-        .replace(/<\/?ul>/igm, "")
-        .replace(/<li>/igm, "* ").replace(/<\/li>/igm, "")
-        .replace(/<h1>/igm, "# ").replace(/<h2>/igm, "## ").replace(/<h3>/igm, "### ").replace(/<h4>/igm, "#### ").replace(/<h5>/igm, "##### ").replace(/<\/h[12345]>/igm, "")
-        .replace(/<a href="([^"]+)">([^<]+)<\/a>/igm, "[$2]($1)")
-        .replace(/<a href="([^"]+)" title="([^"]+)">([^<]+)<\/a>/igm, "[$3]($1 \"$2\")")
+            .replace(/<br ?\/?>/igm, "  \n")
+            .replace(/<\/?strong>/igm, "**")
+            .replace(/<\/?em>/igm, "_")
+            .replace(/<\/?ul>/igm, "")
+            .replace(/<li>/igm, "* ").replace(/<\/li>/igm, "")
+            .replace(/<h1>/igm, "# ").replace(/<h2>/igm, "## ").replace(/<h3>/igm, "### ").replace(/<h4>/igm, "#### ").replace(/<h5>/igm, "##### ").replace(/<\/h[12345]>/igm, "")
+            .replace(/<a href="([^"]+)">([^<]+)<\/a>/igm, "[$2]($1)")
+            .replace(/<a href="([^"]+)" title="([^"]+)">([^<]+)<\/a>/igm, "[$3]($1 \"$2\")")
         ;
+
         // Write result output
         $('#rhtml2md-output').html('\
 <h3>Markdown Extra Output</h3>\
-<textarea id="rhtml2md-output-md" rows="5" cols="60" wrap="off" style="overflow: auto; font-family: monospace;"></textarea>\
+<textarea id="rhtml2md-output-md" rows="10" cols="60" wrap="off" style="' + areastyle + '"></textarea>\
 ');
 
         $('#rhtml2md-output-md').text(converted);
         $('#rhtml2md-output-md').select();
 
-        return true;
+        return false;
     }
 
 })(jQuery);
