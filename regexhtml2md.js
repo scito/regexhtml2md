@@ -51,7 +51,7 @@
  *
  */
 
-(function ($) {
+;(function ($) {
 
     var areastyle = 'font-size: small; overflow: auto; font-family: monospace; width:100%; -webkit-box-sizing: border-box; -moz-box-sizing: border-box; box-sizing: border-box;';
 
@@ -73,7 +73,7 @@
 <p><a href="http://scito.ch">Scito</a></p>\n\
 <p><a href="http://scito.ch" title="Visit me">Scito</a></p>\
 </textarea>\
-<p>To convert, press <kbd>Ctrl</kbd> + <kbd>Enter</kbd> or click on the "Convert" button.\</p>\
+<p>To convert, press <kbd>Ctrl</kbd> <kbd>Enter</kbd> or click on the "Convert" button.\</p>\
 </div>\
 \
 <div style="text-align:center;"><button id="rhtml2md-convert" type="button" title="Starts the conversion" style="margin-top: 1em; margin-bottom: 1em; font-size: x-large;" class="no-print">Convert</button></div>\
