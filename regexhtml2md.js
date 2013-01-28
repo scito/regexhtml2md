@@ -51,7 +51,42 @@
  *
  */
 
+/* Rational:
+ * - Simple one to one Markown Extra replacement, no messing with other parts
+ *   where maybe carefully made
+ *
+ * Todo:
+ * - Add markdown="1" marker for certain block tags, e.g. div, table, td
+ *     - where is marker necessary, parent also?
+ * - id and/or title for h1-5
+ *
+ * Supports:
+ * - Simple code, blockquote, p, br, ul, ol, li, strong, em, b, i, h1-5, hr
+ * - a with optional title
+ * - All other tags or comments are left unchanged
+ *
+ * Limitions:
+ * - No nested structures supported, e.g. for ol, ul, blockquote, code
+ * - Tables are left unchanged, probably won't change
+ * - Images, waiting for support of classes, like titles
+ * - Span of code with `
+ * - No backslash escapes implemented
+ * - Automatic links <url>, not yet implented
+ * - Definition lists not supported
+ * - Abbreviations not yet supported
+ */
+
 ;(function ($) {
+
+    /** Pretty print functionality:
+     * 0: no pretty print
+     * 1: Markdown extra fenced code block
+     * 2: surround <code> with <div class="prettyprint">
+     */
+    var PRETTY_PRINT = 1;
+
+    /** Wrap the converted Markdown text with a <div>. */
+    var WRAP_GLOBAL_DIV = false;
 
     var areastyle = 'font-size: small; overflow: auto; font-family: monospace; width:100%; -webkit-box-sizing: border-box; -moz-box-sizing: border-box; box-sizing: border-box;';
 
@@ -62,9 +97,10 @@
 <h3>HTML-Input</h3>\
 <div>\
 <textarea id="rhtml2md-input" autofocus rows="10" cols="60" wrap="off" style="' + areastyle + '" placeholder="Please enter your HTML text here.">\
+<h2>Title</h2>\
 <p><strong>Strong</strong></p>\n\
 <!--break-->\n\
-<p>Normal -- kurz <em>Em</em>.</p>\n\
+<p>Normal – text <em>Em</em>.</p>\n\
 <p>Normal<br>Break Line</p>\n\
 <ul>\n\
 <li>Foo</li>\n\
@@ -74,7 +110,17 @@
 <li>One</li>\n\
 <li>Two</li>\n\
 </ol>\n\
+<code>\n\
+var i = 0;\n\
+alert(i);\n\
+</code>\n\
+<blockquote>\n\
+<p>It always seems impossible until it is done.</p>\n\
+\n\
+<i>Nelson Mandela</i>\n\
+</blockquote>\n\
 <p><a href="http://scito.ch">Scito</a></p>\n\
+<hr />
 <p><a href="http://scito.ch" title="Visit me">Scito</a></p>\
 </textarea>\
 <input id="rhtml2md-br" value="0" type="checkbox">\
@@ -118,20 +164,34 @@
         var input = $('#rhtml2md-input').val();
         var ignoreBR = $('#rhtml2md-br').attr('checked');
 
-        var converted = convertOl(input).replace(/<p>/igm, "\n").replace(/<\/p>/igm, "\n")
-            .replace(/<\/?strong>/igm, "**")
-            .replace(/<\/?em>/igm, "_")
+        var converted = convertBlockquote(convertOl(input)).replace(/<p>/igm, "\n").replace(/<\/p>/igm, "\n")
+            .replace(/<\/?(strong|b)>/igm, "**")
+            .replace(/<\/?(em|i)>/igm, "_")
             .replace(/<\/?ul>/igm, "\n")
             .replace(/<li>/igm, "* ").replace(/<\/li>/igm, "")
-            .replace(/<h1>/igm, "# ").replace(/<h2>/igm, "## ").replace(/<h3>/igm, "### ").replace(/<h4>/igm, "#### ").replace(/<h5>/igm, "##### ").replace(/<\/h[12345]>/igm, "")
+            .replace(/<h1>/igm, "# ").replace(/<h2>/igm, "## ").replace(/<h3>/igm, "### ").replace(/<h4>/igm, "#### ").replace(/<h5>/igm, "##### ").replace(/<\/h[12345]>/igm, "\n")
             .replace(/<a href="([^"]+)">([^<]+)<\/a>/igm, "[$2]($1)")
             .replace(/<a href="([^"]+)" title="([^"]+)">([^<]+)<\/a>/igm, "[$3]($1 \"$2\")")
+            .replace(/<hr ?\/?/, '- - -')
         ;
         converted = ignoreBR ? converted.replace(/<br ?\/?>/gm, "<br>\n")
             : converted.replace(/<br ?\/?>/gm, "  \n");
 
+        switch (PRETTY_PRINT) {
+            case 1 :
+                converted = converted.replace(/^\s*<code>\s*$/gim, '\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~ .prettyprint')
+                .replace(/^\s*<\/code>\s*$/gim, '~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n');
+                break;
+            case 2 :
+                converted = converted.replace(/^\s*<code>\s*/gim, '<div class="prettyprint">\n<code>')
+                .replace(/^\s*<\/code>/gim, '</code>\n</div>');
+            case 0 :
+            default :
+        }
+
         converted = converted.replace(/\n{3,}/gm, '\n\n');
         converted = converted.replace(/(^\n+|\n+$)/g, '');
+        if (WRAP_GLOBAL_DIV) converted = '<div markdown="1">\n' + converted + '\n</div>';
 
         // Write conversion output
         $('#rhtml2md-output').html('\
@@ -162,13 +222,26 @@
         var pat = /<ol>([\s\S]*?)<\/ol>/mi;  //[\s\S] = dotall; ? = non-greedy match
         var lipat = /<li>/i;
         for (var mat; (mat = r.match(pat)) !== null; ) {
-            mat = '\n' + mat[1].replace(/<\/li>/igm, "")/*.replace(/<li>/igm, "1. ")*/;
+            mat = mat[1].replace(/<\/li>/igm, "")/*.replace(/<li>/igm, "1. ")*/;
             for (var c = 1; mat.search(lipat) !== -1; c++) {
                 mat = mat.replace(lipat, c + ". ");
             }
-            r = r.replace(pat, mat + '\n');
+            r = r.replace(pat, '\n' + mat + '\n');
         }
         return r;
     }
+
+    /** Convert simple blockquote. */
+    function convertBlockquote(str) {
+        var r = str;
+        var pat = /<blockquote>\n?([\s\S]*?)\n?<\/blockquote>/mi;  //[\s\S] = dotall; ? = non-greedy match
+        for (var mat; (mat = r.match(pat)) !== null; ) {
+            mat = mat[1].replace(/\n/gm, '\n> ').replace(/<p>/igm, '\n> ').replace(/<\/p>/igm, '\n> \n> ')
+                .replace(/(\n> ?){3,}/gm,'\n> \n> ');
+            r = r.replace(pat, '\n' + mat + '\n');
+        }
+        return r;
+    }
+
 
 })(jQuery);
