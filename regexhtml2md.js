@@ -66,14 +66,20 @@
 <!--break-->\n\
 <p>Normal -- kurz <em>Em</em>.</p>\n\
 <p>Normal<br>Break Line</p>\n\
-<p><ul>\n\
+<ul>\n\
 <li>Foo</li>\n\
 <li>Bar</li>\n\
 </ul>\n\
+<ol>\n\
+<li>One</li>\n\
+<li>Two</li>\n\
+</ol>\n\
 <p><a href="http://scito.ch">Scito</a></p>\n\
 <p><a href="http://scito.ch" title="Visit me">Scito</a></p>\
 </textarea>\
-<p>To convert, press <kbd>Ctrl</kbd> <kbd>Enter</kbd> or click on the "Convert" button.\</p>\
+<input id="rhtml2md-br" value="0" type="checkbox">\
+<label for="rhtml2md-br" style="display: inline; font-weight: normal; margin-left: 0.5em;">Keep &lt;br&gt;</label>\
+<p>To convert, press <kbd>Ctrl</kbd>&nbsp;<kbd>Enter</kbd> or click on the "Convert" button.\</p>\
 </div>\
 \
 <div style="text-align:center;"><button id="rhtml2md-convert" type="button" title="Starts the conversion" style="margin-top: 1em; margin-bottom: 1em; font-size: x-large;" class="no-print">Convert</button></div>\
@@ -106,9 +112,9 @@
     function convert(event) {
         event.preventDefault();
         var input = $('#rhtml2md-input').val();
+        var ignoreBR = $('#rhtml2md-br').attr('checked');
 
-        var converted = input.replace(/<p>/igm, "").replace(/<\/p>/igm, "\n")
-            .replace(/<br ?\/?>/igm, "  \n")
+        var converted = convertOl(input).replace(/<p>/igm, "").replace(/<\/p>/igm, "\n")
             .replace(/<\/?strong>/igm, "**")
             .replace(/<\/?em>/igm, "_")
             .replace(/<\/?ul>/igm, "")
@@ -117,6 +123,10 @@
             .replace(/<a href="([^"]+)">([^<]+)<\/a>/igm, "[$2]($1)")
             .replace(/<a href="([^"]+)" title="([^"]+)">([^<]+)<\/a>/igm, "[$3]($1 \"$2\")")
         ;
+        converted = ignoreBR ? converted.replace(/<br ?\/?>/gm, "<br>\n")
+            : converted.replace(/<br ?\/?>/gm, "  \n");
+
+        converted = converted.replace(/\n{3,}/gm, '\n\n');
 
         // Write conversion output
         $('#rhtml2md-output').html('\
@@ -133,6 +143,21 @@
         }
 
         return false;
+    }
+
+    /** Convert ol > li to 1. */
+    function convertOl(str) {
+        var r = str;
+        var pat = /<ol>([\s\S]*?)<\/ol>/mi;  //[\s\S] = dotall; ? = non-greedy match
+        var lipat = /<li>/i;
+        for (var mat; (mat = r.match(pat)) !== null; ) {
+            mat = mat[1].replace(/<\/li>/igm, "")/*.replace(/<li>/igm, "1. ")*/;
+            for (var c = 1; mat.search(lipat) !== -1; c++) {
+                mat = mat.replace(lipat, c + ". ");
+            }
+            r = r.replace(pat, mat);
+        }
+        return r;
     }
 
 })(jQuery);
