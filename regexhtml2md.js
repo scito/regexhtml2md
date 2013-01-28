@@ -99,6 +99,10 @@
             convert(event)
         });
 
+        $('#rhtml2md-input').focusin(function(event) {
+            $(this).select();
+        });
+
         $('#rhtml2md-input').select();
     });
 
@@ -114,10 +118,10 @@
         var input = $('#rhtml2md-input').val();
         var ignoreBR = $('#rhtml2md-br').attr('checked');
 
-        var converted = convertOl(input).replace(/<p>/igm, "").replace(/<\/p>/igm, "\n")
+        var converted = convertOl(input).replace(/<p>/igm, "\n").replace(/<\/p>/igm, "\n")
             .replace(/<\/?strong>/igm, "**")
             .replace(/<\/?em>/igm, "_")
-            .replace(/<\/?ul>/igm, "")
+            .replace(/<\/?ul>/igm, "\n")
             .replace(/<li>/igm, "* ").replace(/<\/li>/igm, "")
             .replace(/<h1>/igm, "# ").replace(/<h2>/igm, "## ").replace(/<h3>/igm, "### ").replace(/<h4>/igm, "#### ").replace(/<h5>/igm, "##### ").replace(/<\/h[12345]>/igm, "")
             .replace(/<a href="([^"]+)">([^<]+)<\/a>/igm, "[$2]($1)")
@@ -127,14 +131,21 @@
             : converted.replace(/<br ?\/?>/gm, "  \n");
 
         converted = converted.replace(/\n{3,}/gm, '\n\n');
+        converted = converted.replace(/(^\n+|\n+$)/g, '');
 
         // Write conversion output
         $('#rhtml2md-output').html('\
 <h3>Markdown Extra Output</h3>\
 <textarea id="rhtml2md-output-md" rows="10" cols="60" wrap="off" style="' + areastyle + '"></textarea>\
+<p><small>Note: This is a simple regex HTML to Markdown converter. This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.</small></p>\
 ');
 
         $('#rhtml2md-output-md').text(converted);
+
+        $('#rhtml2md-output-md').focusin(function(event) {
+            $(this).select();
+        });
+
         $('#rhtml2md-output-md').select();
 
         if (typeof Drupal != 'undefined') {
@@ -151,11 +162,11 @@
         var pat = /<ol>([\s\S]*?)<\/ol>/mi;  //[\s\S] = dotall; ? = non-greedy match
         var lipat = /<li>/i;
         for (var mat; (mat = r.match(pat)) !== null; ) {
-            mat = mat[1].replace(/<\/li>/igm, "")/*.replace(/<li>/igm, "1. ")*/;
+            mat = '\n' + mat[1].replace(/<\/li>/igm, "")/*.replace(/<li>/igm, "1. ")*/;
             for (var c = 1; mat.search(lipat) !== -1; c++) {
                 mat = mat.replace(lipat, c + ". ");
             }
-            r = r.replace(pat, mat);
+            r = r.replace(pat, mat + '\n');
         }
         return r;
     }
