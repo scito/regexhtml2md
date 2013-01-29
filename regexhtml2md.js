@@ -123,7 +123,7 @@ alert(i);\n\
 <i>Nelson Mandela</i>\n\
 </blockquote>\n\
 <p><a href="http://scito.ch">Scito</a></p>\n\
-<hr />
+<hr />\
 <p><a href="http://scito.ch" title="Visit me">Scito</a></p>\
 </textarea>\
 <input id="rhtml2md-br" value="0" type="checkbox">\
