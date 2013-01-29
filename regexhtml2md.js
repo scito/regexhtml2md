@@ -56,7 +56,7 @@
  *   where maybe carefully made
  * - Convert only what is equivalent, rest is left untouched
  *
- * Todo:
+ * Todo/ideas:
  * - Describe advantages of this approach better, and its limitations
  * - Add markdown="1" marker for certain block tags, e.g. div, table, td
  *     - where is marker necessary, parent also?
@@ -64,6 +64,7 @@
  * - Use more advanced js regex features,
  *    Pattern delimiters (?:pattern), Lookaheads (?=pattern), (?!pattern),
  *    Backreferences \n, see http://www.javascriptkit.com/javatutors/redev2.shtml
+ * - header id generator (counting id) if not available
  *
  * Supports:
  * - Simple code, blockquote, p, br, ul, ol, li, strong, em, b, i, h1-5, hr
@@ -184,7 +185,7 @@ alert(i);\n\
 
         switch (PRETTY_PRINT) {
             case 1 :
-                converted = converted.replace(/^\s*<code>\s*$/gim, '\n~~~~ {.prettyprint .expandable .lang-js}')
+                converted = converted.replace(/^\s*<code>\s*$/gim, '\n~~~~ {.prettycode .lang-js}')
                 .replace(/^\s*<\/code>\s*$/gim, '~~~~\n');
                 break;
             case 2 :
