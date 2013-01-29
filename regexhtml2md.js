@@ -184,7 +184,7 @@ alert(i);\n\
 
         switch (PRETTY_PRINT) {
             case 1 :
-                converted = converted.replace(/^\s*<code>\s*$/gim, '\n~~~~ .prettyprint')
+                converted = converted.replace(/^\s*<code>\s*$/gim, '\n~~~~ {.prettyprint .expandable .lang-js}')
                 .replace(/^\s*<\/code>\s*$/gim, '~~~~\n');
                 break;
             case 2 :
