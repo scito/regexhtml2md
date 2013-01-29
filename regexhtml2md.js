@@ -54,8 +54,10 @@
 /* Rational:
  * - Simple one to one Markown Extra replacement, no messing with other parts
  *   where maybe carefully made
+ * - Convert only what is equivalent, rest is left untouched
  *
  * Todo:
+ * - Describe advantages of this approach better, and its limitations
  * - Add markdown="1" marker for certain block tags, e.g. div, table, td
  *     - where is marker necessary, parent also?
  * - id and/or title for h1-5
@@ -182,8 +184,8 @@ alert(i);\n\
 
         switch (PRETTY_PRINT) {
             case 1 :
-                converted = converted.replace(/^\s*<code>\s*$/gim, '\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~ .prettyprint')
-                .replace(/^\s*<\/code>\s*$/gim, '~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n');
+                converted = converted.replace(/^\s*<code>\s*$/gim, '\n~~~~ .prettyprint')
+                .replace(/^\s*<\/code>\s*$/gim, '~~~~\n');
                 break;
             case 2 :
                 converted = converted.replace(/^\s*<code>\s*/gim, '<div class="prettyprint">\n<code>')
