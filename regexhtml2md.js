@@ -59,6 +59,9 @@
  * - Add markdown="1" marker for certain block tags, e.g. div, table, td
  *     - where is marker necessary, parent also?
  * - id and/or title for h1-5
+ * - Use more advanced js regex features,
+ *    Pattern delimiters (?:pattern), Lookaheads (?=pattern), (?!pattern),
+ *    Backreferences \n, see http://www.javascriptkit.com/javatutors/redev2.shtml
  *
  * Supports:
  * - Simple code, blockquote, p, br, ul, ol, li, strong, em, b, i, h1-5, hr
