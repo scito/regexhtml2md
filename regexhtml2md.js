@@ -175,7 +175,7 @@ alert(i);\n\
             .replace(/<h1>/igm, "# ").replace(/<h2>/igm, "## ").replace(/<h3>/igm, "### ").replace(/<h4>/igm, "#### ").replace(/<h5>/igm, "##### ").replace(/<\/h[12345]>/igm, "\n")
             .replace(/<a href="([^"]+)">([^<]+)<\/a>/igm, "[$2]($1)")
             .replace(/<a href="([^"]+)" title="([^"]+)">([^<]+)<\/a>/igm, "[$3]($1 \"$2\")")
-            .replace(/<hr ?\/?/, '- - -')
+            .replace(/<hr ?\/?>/, '- - -')
         ;
         converted = ignoreBR ? converted.replace(/<br ?\/?>/gm, "<br>\n")
             : converted.replace(/<br ?\/?>/gm, "  \n");
