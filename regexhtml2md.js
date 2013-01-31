@@ -61,26 +61,20 @@
  * - Add markdown="1" marker for certain block tags, e.g. div, table, td
  *     - where is marker necessary, parent also?
  * - id and/or title for h1-5
- * - Use more advanced js regex features,
- *    Pattern delimiters (?:pattern), Lookaheads (?=pattern), (?!pattern),
- *    Backreferences \n, see http://www.javascriptkit.com/javatutors/redev2.shtml
  * - Header id generator (counting id) if not available
  * - Test robustness, process an MD text with only one html to change
- * - Nested structure test for certain block tags allowing nesting
- *    such as blockquote, ol, ul, then write a warning in an HTML-comment (hint backreferences might be helpful
- * - Do not change text between code and <!php tags, backrefs could be useful or
- *    split on these and copy the content
  * - Write some unit test cases (see how is it done in other projects)
- * - Extract the str based part of the converter, allows easier testing
- * - Inline code vs block code
  *
  * Supports:
  * - Simple code, blockquote, p, br, ul, ol, li, strong, em, b, i, h1-5, hr
  * - a with optional title
  * - All other tags or comments are left unchanged
+ * - Supports code blocks (-> fenced code blocks), inline code (-> backticks) and
+ *   PHP tags. Content between code and PHP tags is left unchanged.
  *
  * Limitions:
- * - No nested structures supported, e.g. for ol, ul, blockquote, code
+ * - No nested listssupported (ol, ul)
+ * - Nested blockquotes are basically supported
  * - Tables are left unchanged, probably won't change
  * - Images, waiting for support of classes, like titles
  * - Inline code with `
@@ -88,6 +82,7 @@
  * - Automatic links <url>, not yet implented
  * - Definition lists not supported
  * - Abbreviations not yet supported
+ * - code tags in php are converted to Markdown
  *
  */
 
@@ -102,6 +97,8 @@
 
     /** Wrap the converted Markdown text with a <div>. */
     var WRAP_GLOBAL_DIV = false;
+
+    var ignore_BR = false;
 
     var areastyle = 'font-size: small; overflow: auto; font-family: monospace; width:100%; -webkit-box-sizing: border-box; -moz-box-sizing: border-box; box-sizing: border-box;';
 
@@ -149,6 +146,20 @@ alert(i);\n\
 <code>\n\
 <strong>Strong in Code</strong>\n\
 </code>\n\
+<p>Some inline <code><strong></code> in text.</p>\n\
+<?php\n\
+<strong>Strong in PHP</strong>\n\
+?>\n\
+<blockquote>\n\
+<p>It always seems impossible until it is done.</p>\n\
+\n\
+<i>Nelson Mandela</i>\n\
+<blockquote>\n\
+<p>It always seems impossible until it is done.</p>\n\
+\n\
+<i>Nelson Mandela</i>\n\
+</blockquote>\n\
+</blockquote>\n\
 </textarea>\
 <input id="rhtml2md-br" value="0" type="checkbox">\
 <label for="rhtml2md-br" style="display: inline; font-weight: normal; margin-left: 0.5em;">Keep &lt;br&gt;</label>\
@@ -191,9 +202,9 @@ alert(i);\n\
     function convert(event) {
         if (event !== null) event.preventDefault();
         var input = $('#rhtml2md-input').val();
-        var ignoreBR = $('#rhtml2md-br').attr('checked');
+        ignore_BR = $('#rhtml2md-br').attr('checked');
 
-        var converted = regexConvert(input, ignoreBR);
+        var converted = regexConvert(input, ignore_BR);
 
         // Write conversion output
         $('#rhtml2md-output').html('\
@@ -230,7 +241,7 @@ alert(i);\n\
         return false;
     }
 
-    function ulOlNestingReplacer(match, p1, p2, offset, string) {
+    function ulOlNestingDetector(match, p1, p2, offset, string) {
         if (p2.match(/<(ul|ol).*?>[\s\S]*?<\/\1>/)) {
             return '\n<!-- ' + p1 + ' is nested. -->\n' + match + '<!-- ' + p1 + ' nesting end -->\n';
         } else {
@@ -238,12 +249,51 @@ alert(i);\n\
         }
     }
 
+    function blockquoteNestingDetector(match, p1, p2, offset, string) {
+        if (p2.match(/<(blockquote).*?>[\s\S]*?<\/\1>/)) {
+            return '\n<!-- ' + p1 + ' is nested. -->\n' + match + '<!-- ' + p1 + ' nesting end -->\n';
+        } else {
+            return match;
+        }
+    }
+
     function regexConvert(input, ignoreBR) {
+        var converted = '';
+        var s = input;
+        var pat = /\s*(?:<(code)>|<(\?)php)([\s\S]+?)(?:<\/\1>|^\2>)\s*/mi;  //[\s\S] = dotall; ? = non-greedy match
+        //var pat = /\s*(?:<(code)>)([\s\S]+?)(?:<\/\1>)\s*/mi;  //[\s\S] = dotall; ? = non-greedy match
+        for (var i; (i = s.search(pat)) !== -1; ) {
+            converted += mdConvert(s.substring(0, i));
+            var m = s.match(pat)[0];
+            switch (PRETTY_PRINT) {
+                case 1 :
+                    converted += m.replace(/^\s*<code>\s*$/gim, '\n\n~~~~ {.prettycode .lang-js}')
+                    .replace(/^\s*<\/code>\s*$/gim, '~~~~\n\n')
+                    .replace(/<\/?code>/gim, '`')
+                    .replace(/^<\?php/im, '\n<?php').replace(/^\?>/im, '?>\n');
+                    break;
+                case 2 :
+                    converted += m.replace(/^\s*<code>\s*/gim, '\n\n<div class="prettyprint">\n<code>')
+                    .replace(/^\s*<\/code>/gim, '</code>\n</div>\n\n')
+                    .replace(/^<\?php/im, '\n<?php').replace(/^\?>/im, '?>\n');
+                    break;
+                case 0 :
+                default :
+                    converted += '\n\n' + m + '\n\n';
+            }
+            s = s.substring(i + m.length);
+        }
+        converted += mdConvert(s);
+
+        if (WRAP_GLOBAL_DIV) converted = '<div markdown="1">\n' + converted + '\n</div>';
+
+        return converted;
+    }
+
+    function mdConvert(input) {
         var converted = input;
 
-        converted = converted.replace(/<(ul|ol).*?>([\s\S]*?)<\/\1>/igm, ulOlNestingReplacer);
-
-        //converted = converted.replace(/<code>[\s\S]*?<\/code>/igm,
+        converted = converted.replace(/<(ul|ol).*?>([\s\S]*?)<\/\1>/igm, ulOlNestingDetector);
 
         converted = convertBlockquote(convertOl(converted)).replace(/<p>/igm, '\n').replace(/<\/p>/igm, '\n')
         .replace(/<\/?(strong|b)>/igm, '**')
@@ -255,24 +305,11 @@ alert(i);\n\
         .replace(/<a href="([^"]+)" title="([^"]+)">([^<]+)<\/a>/igm, '[$3]($1 "$2")')
         .replace(/<hr ?\/?>/, '\n- - -\n')
         ;
-        converted = ignoreBR ? converted.replace(/<br ?\/?>/gm, '<br>\n')
+        converted = ignore_BR ? converted.replace(/<br ?\/?>/gm, '<br>\n')
         : converted.replace(/<br ?\/?>/gm, '  \n');
-
-        switch (PRETTY_PRINT) {
-            case 1 :
-                converted = converted.replace(/^\s*<code>\s*$/gim, '\n~~~~ {.prettycode .lang-js}')
-                .replace(/^\s*<\/code>\s*$/gim, '~~~~\n');
-                break;
-            case 2 :
-                converted = converted.replace(/^\s*<code>\s*/gim, '<div class="prettyprint">\n<code>')
-                .replace(/^\s*<\/code>/gim, '</code>\n</div>');
-            case 0 :
-            default :
-        }
 
         converted = converted.replace(/\n{3,}/gm, '\n\n');
         converted = converted.replace(/(^\n+|\n+$)/g, '');
-        if (WRAP_GLOBAL_DIV) converted = '<div markdown="1">\n' + converted + '\n</div>';
 
         return converted;
     }
@@ -296,6 +333,7 @@ alert(i);\n\
     /** Convert simple blockquote. */
     function convertBlockquote(str) {
         var r = str;
+        //r = r.replace(/<(blockquote).*?>([\s\S]*?)<\/\1>/igm, blockquoteNestingDetector);
         var pat = /<blockquote>\n?([\s\S]*?)\n?<\/blockquote>/mi;  //[\s\S] = dotall; ? = non-greedy match
         for (var mat; (mat = r.match(pat)) !== null; ) {
             mat = mat[1].replace(/\n/gm, '\n> ').replace(/<p>/igm, '\n> ').replace(/<\/p>/igm, '\n> \n> ')
