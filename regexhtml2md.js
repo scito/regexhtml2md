@@ -135,8 +135,20 @@ alert(i);\n\
 <i>Nelson Mandela</i>\n\
 </blockquote>\n\
 <p><a href="http://scito.ch">Scito</a></p>\n\
-<hr />\
-<p><a href="http://scito.ch" title="Visit me">Scito</a></p>\
+<p><a href="http://scito.ch" title="Visit me">Scito</a></p>\n\
+<hr />\n\
+<ul>\n\
+<li>Foo</li>\n\
+<li>Bar\n\
+<ol>\n\
+<li>One</li>\n\
+<li>Two</li>\n\
+</ol>\n\
+</li>\n\
+</ul>\n\
+<code>\n\
+<strong>Strong in Code</strong>\n\
+</code>\n\
 </textarea>\
 <input id="rhtml2md-br" value="0" type="checkbox">\
 <label for="rhtml2md-br" style="display: inline; font-weight: normal; margin-left: 0.5em;">Keep &lt;br&gt;</label>\
@@ -165,6 +177,8 @@ alert(i);\n\
         });
 
         $('#rhtml2md-input').select();
+
+        convert(null);
     });
 
     /**
@@ -175,38 +189,11 @@ alert(i);\n\
      * @return false
      */
     function convert(event) {
-        event.preventDefault();
+        if (event !== null) event.preventDefault();
         var input = $('#rhtml2md-input').val();
         var ignoreBR = $('#rhtml2md-br').attr('checked');
 
-        var converted = convertBlockquote(convertOl(input)).replace(/<p>/igm, "\n").replace(/<\/p>/igm, "\n")
-            .replace(/<\/?(strong|b)>/igm, "**")
-            .replace(/<\/?(em|i)>/igm, "_")
-            .replace(/<\/?ul>/igm, "\n")
-            .replace(/<li>/igm, "* ").replace(/<\/li>/igm, "")
-            .replace(/<h1>/igm, "# ").replace(/<h2>/igm, "## ").replace(/<h3>/igm, "### ").replace(/<h4>/igm, "#### ").replace(/<h5>/igm, "##### ").replace(/<\/h[12345]>/igm, "\n")
-            .replace(/<a href="([^"]+)">([^<]+)<\/a>/igm, "[$2]($1)")
-            .replace(/<a href="([^"]+)" title="([^"]+)">([^<]+)<\/a>/igm, "[$3]($1 \"$2\")")
-            .replace(/<hr ?\/?>/, '- - -\n')
-        ;
-        converted = ignoreBR ? converted.replace(/<br ?\/?>/gm, "<br>\n")
-            : converted.replace(/<br ?\/?>/gm, "  \n");
-
-        switch (PRETTY_PRINT) {
-            case 1 :
-                converted = converted.replace(/^\s*<code>\s*$/gim, '\n~~~~ {.prettycode .lang-js}')
-                .replace(/^\s*<\/code>\s*$/gim, '~~~~\n');
-                break;
-            case 2 :
-                converted = converted.replace(/^\s*<code>\s*/gim, '<div class="prettyprint">\n<code>')
-                .replace(/^\s*<\/code>/gim, '</code>\n</div>');
-            case 0 :
-            default :
-        }
-
-        converted = converted.replace(/\n{3,}/gm, '\n\n');
-        converted = converted.replace(/(^\n+|\n+$)/g, '');
-        if (WRAP_GLOBAL_DIV) converted = '<div markdown="1">\n' + converted + '\n</div>';
+        var converted = regexConvert(input, ignoreBR);
 
         // Write conversion output
         $('#rhtml2md-output').html('\
@@ -216,14 +203,14 @@ alert(i);\n\
 <p id="rhtml2md-output-legal-text" style="display: none"><small>Note: This is a simple regex HTML to Markdown converter. This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.</small></p>\
         ');
 
-        $("#rhtml2md-output-legal-link").click(function () {
-            if ($('#rhtml2md-output-legal-text').is(":visible")) {
+        $('#rhtml2md-output-legal-link').click(function () {
+            if ($('#rhtml2md-output-legal-text').is(':visible')) {
                 $(this).html($(this).html().replace(/Hide/, 'Show'));
             } else {
                 $(this).html($(this).html().replace(/Show/, 'Hide'));
             }
             // Do it afterwards as the operation is async
-            $("#rhtml2md-output-legal-text").slideToggle("slow");
+            $('#rhtml2md-output-legal-text').slideToggle('slow');
         });
 
 
@@ -243,15 +230,63 @@ alert(i);\n\
         return false;
     }
 
+    function ulOlNestingReplacer(match, p1, p2, offset, string) {
+        if (p2.match(/<(ul|ol).*?>[\s\S]*?<\/\1>/)) {
+            return '\n<!-- ' + p1 + ' is nested. -->\n' + match + '<!-- ' + p1 + ' nesting end -->\n';
+        } else {
+            return match;
+        }
+    }
+
+    function regexConvert(input, ignoreBR) {
+        var converted = input;
+
+        converted = converted.replace(/<(ul|ol).*?>([\s\S]*?)<\/\1>/igm, ulOlNestingReplacer);
+
+        //converted = converted.replace(/<code>[\s\S]*?<\/code>/igm,
+
+        converted = convertBlockquote(convertOl(converted)).replace(/<p>/igm, '\n').replace(/<\/p>/igm, '\n')
+        .replace(/<\/?(strong|b)>/igm, '**')
+        .replace(/<\/?(em|i)>/igm, '_')
+        .replace(/<\/?ul>/igm, '\n')
+        .replace(/<li>/igm, '* ').replace(/<\/li>/igm, '')
+        .replace(/<h1>/igm, '\n# ').replace(/<h2>/igm, '\n## ').replace(/<h3>/igm, '\n### ').replace(/<h4>/igm, '\n#### ').replace(/<h5>/igm, '\n##### ').replace(/<\/h[12345]>/igm, '\n')
+        .replace(/<a href="([^"]+)">([^<]+)<\/a>/igm, '[$2]($1)')
+        .replace(/<a href="([^"]+)" title="([^"]+)">([^<]+)<\/a>/igm, '[$3]($1 "$2")')
+        .replace(/<hr ?\/?>/, '\n- - -\n')
+        ;
+        converted = ignoreBR ? converted.replace(/<br ?\/?>/gm, '<br>\n')
+        : converted.replace(/<br ?\/?>/gm, '  \n');
+
+        switch (PRETTY_PRINT) {
+            case 1 :
+                converted = converted.replace(/^\s*<code>\s*$/gim, '\n~~~~ {.prettycode .lang-js}')
+                .replace(/^\s*<\/code>\s*$/gim, '~~~~\n');
+                break;
+            case 2 :
+                converted = converted.replace(/^\s*<code>\s*/gim, '<div class="prettyprint">\n<code>')
+                .replace(/^\s*<\/code>/gim, '</code>\n</div>');
+            case 0 :
+            default :
+        }
+
+        converted = converted.replace(/\n{3,}/gm, '\n\n');
+        converted = converted.replace(/(^\n+|\n+$)/g, '');
+        if (WRAP_GLOBAL_DIV) converted = '<div markdown="1">\n' + converted + '\n</div>';
+
+        return converted;
+    }
+
+
     /** Convert ol > li to 1. */
     function convertOl(str) {
         var r = str;
         var pat = /<ol>([\s\S]*?)<\/ol>/mi;  //[\s\S] = dotall; ? = non-greedy match
         var lipat = /<li>/i;
         for (var mat; (mat = r.match(pat)) !== null; ) {
-            mat = mat[1].replace(/<\/li>/igm, "")/*.replace(/<li>/igm, "1. ")*/;
+            mat = mat[1].replace(/<\/li>/igm, '')/*.replace(/<li>/igm, '1. ')*/;
             for (var c = 1; mat.search(lipat) !== -1; c++) {
-                mat = mat.replace(lipat, c + ". ");
+                mat = mat.replace(lipat, c + '. ');
             }
             r = r.replace(pat, '\n' + mat + '\n');
         }
