@@ -64,7 +64,15 @@
  * - Use more advanced js regex features,
  *    Pattern delimiters (?:pattern), Lookaheads (?=pattern), (?!pattern),
  *    Backreferences \n, see http://www.javascriptkit.com/javatutors/redev2.shtml
- * - header id generator (counting id) if not available
+ * - Header id generator (counting id) if not available
+ * - Test robustness, process an MD text with only one html to change
+ * - Nested structure test for certain block tags allowing nesting
+ *    such as blockquote, ol, ul, then write a warning in an HTML-comment (hint backreferences might be helpful
+ * - Do not change text between code and <!php tags, backrefs could be useful or
+ *    split on these and copy the content
+ * - Write some unit test cases (see how is it done in other projects)
+ * - Extract the str based part of the converter, allows easier testing
+ * - Inline code vs block code
  *
  * Supports:
  * - Simple code, blockquote, p, br, ul, ol, li, strong, em, b, i, h1-5, hr
@@ -75,11 +83,12 @@
  * - No nested structures supported, e.g. for ol, ul, blockquote, code
  * - Tables are left unchanged, probably won't change
  * - Images, waiting for support of classes, like titles
- * - Span of code with `
+ * - Inline code with `
  * - No backslash escapes implemented
  * - Automatic links <url>, not yet implented
  * - Definition lists not supported
  * - Abbreviations not yet supported
+ *
  */
 
 ;(function ($) {
@@ -203,8 +212,20 @@ alert(i);\n\
         $('#rhtml2md-output').html('\
 <h3>Markdown Extra Output</h3>\
 <textarea id="rhtml2md-output-md" rows="10" cols="60" wrap="off" style="' + areastyle + '"></textarea>\
-<p><small>Note: This is a simple regex HTML to Markdown converter. This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.</small></p>\
-');
+<a id="rhtml2md-output-legal-link" onclick="false">Show terms of service</a>\
+<p id="rhtml2md-output-legal-text" style="display: none"><small>Note: This is a simple regex HTML to Markdown converter. This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.</small></p>\
+        ');
+
+        $("#rhtml2md-output-legal-link").click(function () {
+            if ($('#rhtml2md-output-legal-text').is(":visible")) {
+                $(this).html($(this).html().replace(/Hide/, 'Show'));
+            } else {
+                $(this).html($(this).html().replace(/Show/, 'Hide'));
+            }
+            // Do it afterwards as the operation is async
+            $("#rhtml2md-output-legal-text").slideToggle("slow");
+        });
+
 
         $('#rhtml2md-output-md').text(converted);
 
