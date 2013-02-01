@@ -224,7 +224,6 @@ alert(i);\n\
             $('#rhtml2md-output-legal-text').slideToggle('slow');
         });
 
-
         $('#rhtml2md-output-md').text(converted);
 
         $('#rhtml2md-output-md').focusin(function(event) {
@@ -241,6 +240,12 @@ alert(i);\n\
         return false;
     }
 
+    /**
+     * Regex replacer function inserting a warning comment if nested lists
+     * are detected.
+     *
+     * @return the replaced string
+     */
     function ulOlNestingDetector(match, p1, p2, offset, string) {
         if (p2.match(/<(ul|ol).*?>[\s\S]*?<\/\1>/)) {
             return '\n<!-- ' + p1 + ' is nested. -->\n' + match + '<!-- ' + p1 + ' nesting end -->\n';
@@ -249,6 +254,12 @@ alert(i);\n\
         }
     }
 
+    /**
+     * Regex replacer function inserting a warning comment if nested blockquotes
+     * are detected.
+     *
+     * @return the replaced string
+     */
     function blockquoteNestingDetector(match, p1, p2, offset, string) {
         if (p2.match(/<(blockquote).*?>[\s\S]*?<\/\1>/)) {
             return '\n<!-- ' + p1 + ' is nested. -->\n' + match + '<!-- ' + p1 + ' nesting end -->\n';
@@ -257,7 +268,14 @@ alert(i);\n\
         }
     }
 
-    function regexConvert(input, ignoreBR) {
+    /**
+     * Main string based conversion function.
+     *
+     * @param input string to convert
+     *
+     * @return the converted string
+     */
+    function regexConvert(input) {
         var converted = '';
         var s = input;
         var pat = /\s*(?:<(code)>|<(\?)php)([\s\S]+?)(?:<\/\1>|^\2>)\s*/mi;  //[\s\S] = dotall; ? = non-greedy match
@@ -290,6 +308,13 @@ alert(i);\n\
         return converted;
     }
 
+    /**
+     * Replaces HTML with Markdown markup.
+     *
+     * @param input string to convert
+     *
+     * @return the converted string
+     */
     function mdConvert(input) {
         var converted = input;
 
