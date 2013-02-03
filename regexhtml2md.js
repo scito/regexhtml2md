@@ -160,6 +160,7 @@ alert(i);\n\
 <i>Nelson Mandela</i>\n\
 </blockquote>\n\
 </blockquote>\n\
+<span><em>Some EM</em></span>\n\
 </textarea>\
 <input id="rhtml2md-br" value="0" type="checkbox">\
 <label for="rhtml2md-br" style="display: inline; font-weight: normal; margin-left: 0.5em;">Keep &lt;br&gt;</label>\
@@ -321,8 +322,8 @@ alert(i);\n\
         converted = converted.replace(/<(ul|ol).*?>([\s\S]*?)<\/\1>/igm, ulOlNestingDetector);
 
         converted = convertBlockquote(convertOl(converted)).replace(/<p>/igm, '\n').replace(/<\/p>/igm, '\n')
-        .replace(/<\/?(strong|b)>/igm, '**')
-        .replace(/<\/?(em|i)>/igm, '_')
+        .replace(/><(strong|b)>/igm, '> **').replace(/<\/(strong|b)></igm, '** <').replace(/<\/?(strong|b)>/igm, '**')
+        .replace(/><(em|i)>/igm, '> _').replace(/<\/(em|i)></igm, '_ <').replace(/<\/?(em|i)>/igm, '_')
         .replace(/<\/?ul>/igm, '\n')
         .replace(/<li>/igm, '* ').replace(/<\/li>/igm, '')
         .replace(/<h1>/igm, '\n# ').replace(/<h2>/igm, '\n## ').replace(/<h3>/igm, '\n### ').replace(/<h4>/igm, '\n#### ').replace(/<h5>/igm, '\n##### ').replace(/<\/h[12345]>/igm, '\n')
