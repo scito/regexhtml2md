@@ -161,6 +161,7 @@ alert(i);\n\
 </blockquote>\n\
 </blockquote>\n\
 <span><em>Some EM</em></span>\n\
+<h2 id="some-title">An id title Test</h2>\n\
 </textarea>\
 <input id="rhtml2md-br" value="0" type="checkbox">\
 <label for="rhtml2md-br" style="display: inline; font-weight: normal; margin-left: 0.5em;">Keep &lt;br&gt;</label>\
@@ -326,7 +327,13 @@ alert(i);\n\
         .replace(/><(em|i)>/igm, '> _').replace(/<\/(em|i)></igm, '_ <').replace(/<\/?(em|i)>/igm, '_')
         .replace(/<\/?ul>/igm, '\n')
         .replace(/<li>/igm, '* ').replace(/<\/li>/igm, '')
-        .replace(/<h1>/igm, '\n# ').replace(/<h2>/igm, '\n## ').replace(/<h3>/igm, '\n### ').replace(/<h4>/igm, '\n#### ').replace(/<h5>/igm, '\n##### ').replace(/<\/h[12345]>/igm, '\n')
+        .replace(/<h1\s+id="([-\w]+)">(.*?)<\/h1>/igm, '\n# $2 {#$1}\n')
+        .replace(/<h2\s+id="([-\w]+)">(.*?)<\/h2>/igm, '\n## $2 {#$1}\n')
+        .replace(/<h3\s+id="([-\w]+)">(.*?)<\/h3>/igm, '\n### $2 {#$1}\n')
+        .replace(/<h4\s+id="([-\w]+)">(.*?)<\/h4>/igm, '\n#### $2 {#$1}\n')
+        .replace(/<h5\s+id="([-\w]+)">(.*?)<\/h5>/igm, '\n##### $2 {#$1}\n')
+        .replace(/<h6\s+id="([-\w]+)">(.*?)<\/h6>/igm, '\n###### $2 {#$1}\n')
+        .replace(/<h1>/igm, '\n# ').replace(/<h2>/igm, '\n## ').replace(/<h3>/igm, '\n### ').replace(/<h4>/igm, '\n#### ').replace(/<h5>/igm, '\n##### ').replace(/<h6>/igm, '\n###### ').replace(/<\/h[123456]>/igm, '\n')
         .replace(/<a href="([^"]+)">([^<]+)<\/a>/igm, '[$2]($1)')
         .replace(/<a href="([^"]+)" title="([^"]+)">([^<]+)<\/a>/igm, '[$3]($1 "$2")')
         .replace(/<hr ?\/?>/, '\n- - -\n')
