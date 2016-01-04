@@ -234,6 +234,9 @@ alert(i);\n\
 
         $('#rhtml2md-output-md').select();
 
+        // Copy to clipboard, ref: https://developer.mozilla.org/en-US/docs/Web/API/Document/execCommand
+        document.execCommand("copy", false, null);
+
         if (typeof Drupal != 'undefined') {
             // Run attached Drupal behaviors
             Drupal.attachBehaviors($('#regexhtml2md').get());
