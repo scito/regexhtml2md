@@ -66,7 +66,7 @@
  * - Write some unit test cases (see how is it done in other projects)
  *
  * Supports:
- * - Simple code, blockquote, p, br, ul, ol, li, strong, em, b, i, h1-5, hr
+ * - Simple code, blockquote, p, br, ul, ol, li, strong, em, b, i, h1-5, hr, table
  * - a with optional title
  * - All other tags or comments are left unchanged
  * - Supports code blocks (-> fenced code blocks), inline code (-> backticks) and
@@ -75,7 +75,7 @@
  * Limitions:
  * - No nested listssupported (ol, ul)
  * - Nested blockquotes are basically supported
- * - Tables are left unchanged, probably won't change
+ * - Tables are basically supported
  * - Images, waiting for support of classes, like titles
  * - Inline code with `
  * - No backslash escapes implemented
@@ -340,6 +340,13 @@ alert(i);\n\
         .replace(/<a href="([^"]+)">([^<]+)<\/a>/igm, '[$2]($1)')
         .replace(/<a href="([^"]+)" title="([^"]+)">([^<]+)<\/a>/igm, '[$3]($1 "$2")')
         .replace(/<hr ?\/?>/, '\n- - -\n')
+        .replace(/<table([^>]*)>/ig, '<div $1>')
+        .replace(/<\/table>/ig, '<\/div>')
+        .replace(/<colgroup([^>]*)>.*?<\/colgroup>/igm, '')
+        .replace(/<\/?tbody([^>]*)>/ig, '')
+        .replace(/<tr>\s*<td>/ig, '')
+        .replace(/<\/td>\s*<td>/ig, ' | ')
+        .replace(/<\/td>\s*<\/tr>/ig, '')
         ;
         converted = ignore_BR ? converted.replace(/<br ?\/?>/gm, '<br>\n')
         : converted.replace(/<br ?\/?>/gm, '  \n');
