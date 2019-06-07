@@ -162,6 +162,34 @@ alert(i);\n\
 </blockquote>\n\
 <span><em>Some EM</em></span>\n\
 <h2 id="some-title">An id title Test</h2>\n\
+\n\
+<table class="table-class">\n\
+  <colgroup><col class="first-col"/><col class="col-basic"/><col class="col-basic"/></colgroup>\n\
+  <thead>\n\
+  <tr>\n\
+    <th>Country</th>\n\
+    <th>Code</th>\n\
+    <th>Capital</th>\n\
+  </tr>\n\
+  </thead>\n\
+  <tbody>\n\
+  <tr>\n\
+    <td>Switzerland</td>\n\
+    <td>ch</td>\n\
+    <td>Bern</td>\n\
+  </tr>\n\
+  <tr>\n\
+    <td>Germany</td>\n\
+    <td>de</td>\n\
+    <td>Berlin</td>\n\
+  </tr>\n\
+  <tr>\n\
+    <td>France</td>\n\
+    <td>fr</td>\n\
+    <td>Paris</td>\n\
+  </tr>\n\
+  <tbody>\n\
+</table>\n\
 </textarea>\
 <input id="rhtml2md-br" value="0" type="checkbox">\
 <label for="rhtml2md-br" style="display: inline; font-weight: normal; margin-left: 0.5em;">Keep &lt;br&gt;</label>\
@@ -340,13 +368,17 @@ alert(i);\n\
         .replace(/<a href="([^"]+)">([^<]+)<\/a>/igm, '[$2]($1)')
         .replace(/<a href="([^"]+)" title="([^"]+)">([^<]+)<\/a>/igm, '[$3]($1 "$2")')
         .replace(/<hr ?\/?>/, '\n- - -\n')
-        .replace(/<table([^>]*)>/ig, '<div $1>')
-        .replace(/<\/table>/ig, '<\/div>')
-        .replace(/<colgroup([^>]*)>.*?<\/colgroup>/igm, '')
-        .replace(/<\/?tbody([^>]*)>/ig, '')
-        .replace(/<tr>\s*<td>/ig, '')
-        .replace(/<\/td>\s*<td>/ig, ' | ')
-        .replace(/<\/td>\s*<\/tr>/ig, '')
+        .replace(/\s*<table([^>]*)>/ig, '\n\n<div$1>')
+        .replace(/\s*<colgroup([^>]*)>.*?<\/colgroup>\s*/igm, '')
+        .replace(/\s*<\/?thead([^>]*)>\s*/ig, '')
+        .replace(/\s*<\/?tbody([^>]*)>\s*/ig, '')
+        .replace(/\s*<tr>\s*<th>/igm, '\n')
+        .replace(/<\/th>\s*<th>/igm, ' | ')
+        .replace(/<\/th>\s*<\/tr>/igm, '\n - | -\n')
+        .replace(/\s*<tr>\s*<td>/igm, '\n')
+        .replace(/<\/td>\s*<td>/igm, ' | ')
+        .replace(/<\/td>\s*<\/tr>/igm, '')
+        .replace(/\s*<\/table>/ig, '\n<\/div>')
         ;
         converted = ignore_BR ? converted.replace(/<br ?\/?>/gm, '<br>\n')
         : converted.replace(/<br ?\/?>/gm, '  \n');
