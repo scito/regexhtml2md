@@ -1,5 +1,5 @@
 /*
- * Simple HTML to Markdown Extra converter with regex.
+ * Simple HTML to Markdown Extra converter with regex (regexhtml2md.js).
  *
  * Copy your HTML to the input area, press Ctrl+Enter, and copy your
  * Markdown Extra from the output area.
