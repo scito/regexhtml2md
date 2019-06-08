@@ -4,15 +4,16 @@
  * Copy your HTML to the input area, press Ctrl+Enter, and copy your
  * Markdown Extra from the output area.
  *
- * Copyright (C) 2013 Scito <http://scito.ch>
+ * Copyright (C) 2013-2019 Scito <https://scito.ch>
  *
  *
  * Changelog:
+ * - 08.06.2019: Add basic table support
  * - 27.01.2013: Initial version by scito
  *
  *
  * Dependencies:
- * - jQuery <http://jquery.com/>
+ * - jQuery <https://jquery.com/>
  *
  *
  * HMTL code to run this script:
@@ -33,21 +34,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- *
- *
- * Dieses Programm ist Freie Software: Sie können es unter den Bedingungen
- * der GNU General Public License, wie von der Free Software Foundation,
- * Version 3 der Lizenz oder (nach Ihrer Option) jeder späteren
- * veröffentlichten Version, weiterverbreiten und/oder modifizieren.
- *
- * Dieses Programm wird in der Hoffnung, dass es nützlich sein wird, aber
- * OHNE JEDE GEWÄHRLEISTUNG, bereitgestellt; sogar ohne die implizite
- * Gewährleistung der MARKTFÄHIGKEIT oder EIGNUNG FÜR EINEN BESTIMMTEN ZWECK.
- * Siehe die GNU General Public License für weitere Details.
- *
- * Sie sollten eine Kopie der GNU General Public License zusammen mit diesem
- * Programm erhalten haben. Wenn nicht, siehe <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  */
 
@@ -131,8 +118,8 @@ alert(i);\n\
 \n\
 <i>Nelson Mandela</i>\n\
 </blockquote>\n\
-<p><a href="http://scito.ch">Scito</a></p>\n\
-<p><a href="http://scito.ch" title="Visit me">Scito</a></p>\n\
+<p><a href="https://scito.ch">Scito</a></p>\n\
+<p><a href="https://scito.ch" title="Visit me">Scito</a></p>\n\
 <hr />\n\
 <ul>\n\
 <li>Foo</li>\n\
@@ -190,6 +177,8 @@ alert(i);\n\
   </tr>\n\
   <tbody>\n\
 </table>\n\
+\n\
+<font style="vertical-align: inherit;">name</font>\n\
 </textarea>\
 <input id="rhtml2md-br" value="0" type="checkbox">\
 <label for="rhtml2md-br" style="display: inline; font-weight: normal; margin-left: 0.5em;">Keep &lt;br&gt;</label>\
@@ -379,6 +368,7 @@ alert(i);\n\
         .replace(/<\/td>\s*<td>/igm, ' | ')
         .replace(/<\/td>\s*<\/tr>/igm, '')
         .replace(/\s*<\/table>/ig, '\n<\/div>')
+        .replace(/<\/?font[^>]*>/ig, '')
         ;
         converted = ignore_BR ? converted.replace(/<br ?\/?>/gm, '<br>\n')
         : converted.replace(/<br ?\/?>/gm, '  \n');
